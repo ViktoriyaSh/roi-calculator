@@ -1,11 +1,14 @@
 /* ============================================================
-   EPAM Brand Theme — Theme B
-   Primary: #3399ff  |  Sidebar bg: #1a1a2e  |  Content bg: #0f0f1a
+   Theme System — Light / Dark / EPAM
+   Switched via data-theme attribute on <html>
    ============================================================ */
 
-:root {
+/* ── EPAM Brand (default) ─────────────────────────────────── */
+:root,
+[data-theme="epam"] {
   --primary: #3399ff;
   --primary-dim: #1a6fbf;
+  --primary-rgb: 51, 153, 255;
   --sidebar-bg: #1a1a2e;
   --sidebar-text: #b0b8d4;
   --sidebar-active-bg: rgba(51, 153, 255, 0.15);
@@ -14,6 +17,8 @@
   --content-bg: #12121f;
   --card-bg: #1c1c30;
   --card-border: #2a2a44;
+  --chart-grid: #2a2a3e;
+  --chart-refline: #555577;
   --text-primary: #e8eaf6;
   --text-secondary: #8888aa;
   --highlight-bg: rgba(51, 153, 255, 0.12);
@@ -21,6 +26,54 @@
   --input-border: #2e2e4a;
   --topbar-bg: #1c1c30;
   --shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Light Theme ──────────────────────────────────────────── */
+[data-theme="light"] {
+  --primary: #2563eb;
+  --primary-dim: #1d4ed8;
+  --primary-rgb: 37, 99, 235;
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #94a3b8;
+  --sidebar-active-bg: rgba(37, 99, 235, 0.12);
+  --sidebar-active-text: #60a5fa;
+  --sidebar-width: 220px;
+  --content-bg: #f1f5f9;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --chart-grid: #e2e8f0;
+  --chart-refline: #94a3b8;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --highlight-bg: rgba(37, 99, 235, 0.08);
+  --input-bg: #f8fafc;
+  --input-border: #cbd5e1;
+  --topbar-bg: #ffffff;
+  --shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Dark Theme (neutral) ─────────────────────────────────── */
+[data-theme="dark"] {
+  --primary: #7c3aed;
+  --primary-dim: #6d28d9;
+  --primary-rgb: 124, 58, 237;
+  --sidebar-bg: #111111;
+  --sidebar-text: #a3a3a3;
+  --sidebar-active-bg: rgba(124, 58, 237, 0.15);
+  --sidebar-active-text: #a78bfa;
+  --sidebar-width: 220px;
+  --content-bg: #171717;
+  --card-bg: #262626;
+  --card-border: #404040;
+  --chart-grid: #333333;
+  --chart-refline: #525252;
+  --text-primary: #fafafa;
+  --text-secondary: #a3a3a3;
+  --highlight-bg: rgba(124, 58, 237, 0.15);
+  --input-bg: #1a1a1a;
+  --input-border: #525252;
+  --topbar-bg: #262626;
+  --shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Reset ────────────────────────────────────────────────── */
@@ -119,6 +172,53 @@ body {
   color: var(--text-secondary);
   border-top: 1px solid var(--card-border);
   text-align: center;
+}
+
+/* ── Theme Switcher ───────────────────────────────────────── */
+.theme-switcher {
+  padding: 14px 16px;
+  border-top: 1px solid var(--card-border);
+}
+
+.theme-switcher-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.theme-switcher-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.theme-btn {
+  flex: 1;
+  padding: 6px 4px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.theme-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--primary);
+}
+
+.theme-btn--active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
 
 /* ── Main Content ─────────────────────────────────────────── */
@@ -318,7 +418,7 @@ body {
 .field input:focus,
 .field select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(51, 153, 255, 0.18);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18);
 }
 
 .field select {
@@ -389,6 +489,45 @@ body {
   color: #ff4d4d;
   margin-top: 4px;
   display: block;
+}
+
+/* Light theme — softer error tones */
+[data-theme="light"] .field--error input,
+[data-theme="light"] .field--error select {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+[data-theme="light"] .field-error {
+  color: #dc2626;
+}
+
+[data-theme="light"] .results-overlay-msg {
+  border-color: #fca5a5;
+  color: #dc2626;
+  background: #fff;
+}
+
+[data-theme="light"] .negative {
+  color: #dc2626;
+}
+
+[data-theme="light"] .positive {
+  color: #16a34a;
+}
+
+[data-theme="light"] .row-breakeven {
+  background: rgba(22, 163, 74, 0.1) !important;
+}
+
+[data-theme="light"] .row-breakeven td,
+[data-theme="light"] .breakeven-badge {
+  color: #16a34a;
+}
+
+[data-theme="light"] .breakeven-badge {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.4);
 }
 
 /* ── Results disabled overlay ─────────────────────────────── */

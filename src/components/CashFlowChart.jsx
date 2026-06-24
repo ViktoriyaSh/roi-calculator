@@ -39,18 +39,24 @@ function CustomTooltip({ active, payload, label, comparing }) {
 }
 
 function CashFlowChart({ data, comparing, colorA, colorB }) {
+  // Read CSS variables so chart lines respect the active theme
+  const style = getComputedStyle(document.documentElement);
+  const gridColor = style.getPropertyValue('--chart-grid').trim() || '#2a2a3e';
+  const refLineColor = style.getPropertyValue('--chart-refline').trim() || '#555577';
+  const axisColor = style.getPropertyValue('--text-secondary').trim() || '#8888aa';
+
   return (
     <div className="card chart-card" id="cashflow-chart">
       <h2 className="section-title">Cumulative Cash Flow</h2>
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3e" />
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
           <XAxis
             dataKey="month"
-            label={{ value: 'Month', position: 'insideBottomRight', offset: -5, fill: '#8888aa' }}
-            tick={{ fill: '#8888aa', fontSize: 12 }}
+            label={{ value: 'Month', position: 'insideBottomRight', offset: -5, fill: axisColor }}
+            tick={{ fill: axisColor, fontSize: 12 }}
           />
-          <YAxis tickFormatter={formatYAxis} tick={{ fill: '#8888aa', fontSize: 12 }} />
+          <YAxis tickFormatter={formatYAxis} tick={{ fill: axisColor, fontSize: 12 }} />
           <Tooltip content={<CustomTooltip comparing={comparing} />} />
           {comparing && (
             <Legend
@@ -62,9 +68,9 @@ function CashFlowChart({ data, comparing, colorA, colorB }) {
           )}
           <ReferenceLine
             y={0}
-            stroke="#555577"
+            stroke={refLineColor}
             strokeDasharray="6 3"
-            label={{ value: 'Break-even', fill: '#8888aa', fontSize: 11 }}
+            label={{ value: 'Break-even', fill: axisColor, fontSize: 11 }}
           />
           {comparing ? (
             <>

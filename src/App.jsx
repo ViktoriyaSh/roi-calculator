@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import InputForm from './components/InputForm';
 import Results from './components/Results';
 import CashFlowChart from './components/CashFlowChart';
 import BreakdownTable from './components/BreakdownTable';
+import ThemeSwitcher from './components/ThemeSwitcher';
 import {
   calcMonthlyNetProfit,
   calcCumulativeCashFlow,
@@ -52,6 +53,15 @@ function App() {
   const [validA, setValidA] = useState(true);
   const [validB, setValidB] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem('roi-theme') || 'epam'
+  );
+
+  // Apply theme to <html> and persist to localStorage
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('roi-theme', theme);
+  }, [theme]);
 
   const scenarioA = calcScenario(valuesA);
   const scenarioB = calcScenario(valuesB);
@@ -95,7 +105,8 @@ function App() {
             <span className="nav-icon">&#9881;</span> Settings
           </a>
         </nav>
-        <div className="sidebar-footer">Theme B — EPAM Brand</div>
+        <ThemeSwitcher theme={theme} onChange={setTheme} />
+        <div className="sidebar-footer">EPAM ROI Calculator</div>
       </aside>
 
       {/* Main content */}
