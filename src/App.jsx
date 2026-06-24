@@ -4,6 +4,7 @@ import Results from './components/Results';
 import CashFlowChart from './components/CashFlowChart';
 import BreakdownTable from './components/BreakdownTable';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import EmbedModal from './components/EmbedModal';
 import {
   calcMonthlyNetProfit,
   calcCumulativeCashFlow,
@@ -53,9 +54,13 @@ function App() {
   const [validA, setValidA] = useState(true);
   const [validB, setValidB] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
   const [theme, setTheme] = useState(
     () => localStorage.getItem('roi-theme') || 'epam'
   );
+
+  // Detect ?embed=true in URL — hides sidebar and top bar
+  const embedMode = new URLSearchParams(window.location.search).get('embed') === 'true';
 
   // Apply theme to <html> and persist to localStorage
   useEffect(() => {
@@ -87,52 +92,60 @@ function App() {
   });
 
   return (
-    <div className="app-shell">
-      {/* Dark sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-logo">
-          <span className="sidebar-logo-epam">EPAM</span>
-          <span className="sidebar-logo-sub">ROI Calculator</span>
-        </div>
-        <nav className="sidebar-nav">
-          <a className="sidebar-nav-item sidebar-nav-item--active" href="#">
-            <span className="nav-icon">&#9698;</span> Calculator
-          </a>
-          <a className="sidebar-nav-item" href="#">
-            <span className="nav-icon">&#9776;</span> Reports
-          </a>
-          <a className="sidebar-nav-item" href="#">
-            <span className="nav-icon">&#9881;</span> Settings
-          </a>
-        </nav>
-        <ThemeSwitcher theme={theme} onChange={setTheme} />
-        <div className="sidebar-footer">EPAM ROI Calculator</div>
-      </aside>
+    <div className={`app-shell${embedMode ? ' app-shell--embed' : ''}`}>
+      {/* Dark sidebar — hidden in embed mode */}
+      {!embedMode && (
+        <aside className="sidebar">
+          <div className="sidebar-logo">
+            <span className="sidebar-logo-epam">EPAM</span>
+            <span className="sidebar-logo-sub">ROI Calculator</span>
+          </div>
+          <nav className="sidebar-nav">
+            <a className="sidebar-nav-item sidebar-nav-item--active" href="#">
+              <span className="nav-icon">&#9698;</span> Calculator
+            </a>
+            <a className="sidebar-nav-item" href="#">
+              <span className="nav-icon">&#9776;</span> Reports
+            </a>
+            <a className="sidebar-nav-item" href="#">
+              <span className="nav-icon">&#9881;</span> Settings
+            </a>
+          </nav>
+          <ThemeSwitcher theme={theme} onChange={setTheme} />
+          <div className="sidebar-footer">EPAM ROI Calculator</div>
+        </aside>
+      )}
 
       {/* Main content */}
       <main className="main-content">
-        <header className="top-bar">
-          <h1 className="top-bar-title">Business ROI Calculator</h1>
-          <span className="top-bar-badge">Live</span>
-          <div className="top-bar-spacer" />
-          <button
-            className="btn btn--export"
-            onClick={handleExportPdf}
-            disabled={!resultsValid || exporting}
-            title={!resultsValid ? 'Fix errors before exporting' : 'Download PDF report'}
-          >
-            {exporting ? 'Exporting...' : '↓ Export PDF'}
-          </button>
-          {comparing ? (
-            <button className="btn btn--danger" onClick={() => setComparing(false)}>
-              ✕ Remove Scenario
+        {/* Top bar — hidden in embed mode */}
+        {!embedMode && (
+          <header className="top-bar">
+            <h1 className="top-bar-title">Business ROI Calculator</h1>
+            <span className="top-bar-badge">Live</span>
+            <div className="top-bar-spacer" />
+            <button
+              className="btn btn--export"
+              onClick={handleExportPdf}
+              disabled={!resultsValid || exporting}
+              title={!resultsValid ? 'Fix errors before exporting' : 'Download PDF report'}
+            >
+              {exporting ? 'Exporting...' : '↓ Export PDF'}
             </button>
-          ) : (
-            <button className="btn btn--primary" onClick={() => setComparing(true)}>
-              + Add Scenario
+            <button className="btn btn--embed" onClick={() => setShowEmbed(true)}>
+              &lt;/&gt; Embed
             </button>
-          )}
-        </header>
+            {comparing ? (
+              <button className="btn btn--danger" onClick={() => setComparing(false)}>
+                ✕ Remove Scenario
+              </button>
+            ) : (
+              <button className="btn btn--primary" onClick={() => setComparing(true)}>
+                + Add Scenario
+              </button>
+            )}
+          </header>
+        )}
 
         <div className={`content-grid${comparing ? ' content-grid--compare' : ''}`}>
           {/* Scenario A form */}
@@ -207,6 +220,9 @@ function App() {
           </section>
         </div>
       </main>
+
+      {/* Embed modal */}
+      {showEmbed && <EmbedModal onClose={() => setShowEmbed(false)} />}
     </div>
   );
 }
