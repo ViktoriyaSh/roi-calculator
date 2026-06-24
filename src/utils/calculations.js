@@ -27,6 +27,18 @@ export function calcROI(totalNetProfit, initialInvestment) {
   return (totalNetProfit / initialInvestment) * 100;
 }
 
+export function calcMonthlyBreakdown(monthlyRevenue, monthlyCosts, initialInvestment, months) {
+  const monthlyNetProfit = monthlyRevenue - monthlyCosts;
+  return Array.from({ length: months }, (_, i) => {
+    const month = i + 1;
+    const cumulative = monthlyNetProfit * month - initialInvestment;
+    const prevCumulative = monthlyNetProfit * (month - 1) - initialInvestment;
+    // Break-even month: cumulative just turned non-negative
+    const isBreakEven = cumulative >= 0 && prevCumulative < 0;
+    return { month, monthlyRevenue, monthlyCosts, monthlyNetProfit, cumulative, isBreakEven };
+  });
+}
+
 export function formatCurrency(value) {
   return '$' + Math.round(value).toLocaleString('en-US');
 }

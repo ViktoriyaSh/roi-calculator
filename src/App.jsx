@@ -2,12 +2,14 @@ import { useState } from 'react';
 import InputForm from './components/InputForm';
 import Results from './components/Results';
 import CashFlowChart from './components/CashFlowChart';
+import BreakdownTable from './components/BreakdownTable';
 import {
   calcMonthlyNetProfit,
   calcCumulativeCashFlow,
   calcPaybackPeriod,
   calcTotalNetProfit,
   calcROI,
+  calcMonthlyBreakdown,
 } from './utils/calculations';
 
 const DEFAULTS_A = {
@@ -38,6 +40,7 @@ function calcScenario(values) {
     roi: calcROI(totalNetProfit, values.initialInvestment),
     payback: calcPaybackPeriod(values.initialInvestment, monthlyNetProfit),
     chartData: calcCumulativeCashFlow(monthlyNetProfit, values.initialInvestment, values.period),
+    breakdown: calcMonthlyBreakdown(values.monthlyRevenue, values.monthlyCosts, values.initialInvestment, values.period),
   };
 }
 
@@ -162,6 +165,16 @@ function App() {
                 comparing={comparing}
                 colorA={SCENARIO_COLORS.A}
                 colorB={SCENARIO_COLORS.B}
+              />
+
+              <BreakdownTable
+                comparing={comparing}
+                scenarios={comparing ? [
+                  { rows: scenarioA.breakdown, color: SCENARIO_COLORS.A },
+                  { rows: scenarioB.breakdown.slice(0, scenarioA.breakdown.length), color: SCENARIO_COLORS.B },
+                ] : [
+                  { rows: scenarioA.breakdown, color: SCENARIO_COLORS.A },
+                ]}
               />
             </div>
           </section>
