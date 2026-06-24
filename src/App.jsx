@@ -11,6 +11,7 @@ import {
   calcROI,
   calcMonthlyBreakdown,
 } from './utils/calculations';
+import { exportPdf } from './utils/exportPdf';
 
 const DEFAULTS_A = {
   initialInvestment: 100000,
@@ -50,11 +51,18 @@ function App() {
   const [comparing, setComparing] = useState(false);
   const [validA, setValidA] = useState(true);
   const [validB, setValidB] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   const scenarioA = calcScenario(valuesA);
   const scenarioB = calcScenario(valuesB);
 
   const resultsValid = comparing ? validA && validB : validA;
+
+  async function handleExportPdf() {
+    setExporting(true);
+    await exportPdf({ valuesA, valuesB, scenarioA, scenarioB, comparing });
+    setExporting(false);
+  }
 
   const maxPeriod = comparing ? Math.max(valuesA.period, valuesB.period) : valuesA.period;
   const mergedChartData = Array.from({ length: maxPeriod }, (_, i) => {
@@ -96,6 +104,14 @@ function App() {
           <h1 className="top-bar-title">Business ROI Calculator</h1>
           <span className="top-bar-badge">Live</span>
           <div className="top-bar-spacer" />
+          <button
+            className="btn btn--export"
+            onClick={handleExportPdf}
+            disabled={!resultsValid || exporting}
+            title={!resultsValid ? 'Fix errors before exporting' : 'Download PDF report'}
+          >
+            {exporting ? 'Exporting...' : '↓ Export PDF'}
+          </button>
           {comparing ? (
             <button className="btn btn--danger" onClick={() => setComparing(false)}>
               ✕ Remove Scenario

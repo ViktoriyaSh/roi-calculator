@@ -200,6 +200,22 @@ body {
   background: rgba(255, 107, 107, 0.1);
 }
 
+.btn--export {
+  background: transparent;
+  color: #4ade80;
+  border: 1px solid #4ade8044;
+}
+
+.btn--export:hover {
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.btn--export:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ── Content Grid ─────────────────────────────────────────── */
 .content-grid {
   display: grid;

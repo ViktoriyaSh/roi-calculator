@@ -40,7 +40,7 @@ function CustomTooltip({ active, payload, label, comparing }) {
 
 function CashFlowChart({ data, comparing, colorA, colorB }) {
   return (
-    <div className="card chart-card">
+    <div className="card chart-card" id="cashflow-chart">
       <h2 className="section-title">Cumulative Cash Flow</h2>
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
