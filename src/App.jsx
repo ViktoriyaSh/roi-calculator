@@ -45,11 +45,14 @@ function App() {
   const [valuesA, setValuesA] = useState(DEFAULTS_A);
   const [valuesB, setValuesB] = useState(DEFAULTS_B);
   const [comparing, setComparing] = useState(false);
+  const [validA, setValidA] = useState(true);
+  const [validB, setValidB] = useState(true);
 
   const scenarioA = calcScenario(valuesA);
   const scenarioB = calcScenario(valuesB);
 
-  // Merge chart data for comparison: each point has valueA and valueB keyed by month
+  const resultsValid = comparing ? validA && validB : validA;
+
   const maxPeriod = comparing ? Math.max(valuesA.period, valuesB.period) : valuesA.period;
   const mergedChartData = Array.from({ length: maxPeriod }, (_, i) => {
     const month = i + 1;
@@ -110,6 +113,7 @@ function App() {
               label="Scenario A"
               color={SCENARIO_COLORS.A}
               showLabel={comparing}
+              onValidChange={setValidA}
             />
           </section>
 
@@ -122,34 +126,44 @@ function App() {
                 label="Scenario B"
                 color={SCENARIO_COLORS.B}
                 showLabel={true}
+                onValidChange={setValidB}
               />
             </section>
           )}
 
-          {/* Results + Chart span full remaining width */}
+          {/* Results + Chart */}
           <section className={`col-right${comparing ? ' col-right--compare' : ''}`}>
-            {comparing ? (
-              <div className="results-comparison">
-                <Results
-                  {...scenarioA}
-                  label="Scenario A"
-                  color={SCENARIO_COLORS.A}
-                />
-                <Results
-                  {...scenarioB}
-                  label="Scenario B"
-                  color={SCENARIO_COLORS.B}
-                />
-              </div>
-            ) : (
-              <Results {...scenarioA} />
-            )}
-            <CashFlowChart
-              data={comparing ? mergedChartData : scenarioA.chartData}
-              comparing={comparing}
-              colorA={SCENARIO_COLORS.A}
-              colorB={SCENARIO_COLORS.B}
-            />
+            <div className={`results-wrapper${!resultsValid ? ' results-wrapper--disabled' : ''}`}>
+              {!resultsValid && (
+                <div className="results-overlay">
+                  <span className="results-overlay-msg">Fix the errors above to see results</span>
+                </div>
+              )}
+
+              {comparing ? (
+                <div className="results-comparison">
+                  <Results
+                    {...scenarioA}
+                    label="Scenario A"
+                    color={SCENARIO_COLORS.A}
+                  />
+                  <Results
+                    {...scenarioB}
+                    label="Scenario B"
+                    color={SCENARIO_COLORS.B}
+                  />
+                </div>
+              ) : (
+                <Results {...scenarioA} />
+              )}
+
+              <CashFlowChart
+                data={comparing ? mergedChartData : scenarioA.chartData}
+                comparing={comparing}
+                colorA={SCENARIO_COLORS.A}
+                colorB={SCENARIO_COLORS.B}
+              />
+            </div>
           </section>
         </div>
       </main>
