@@ -157,6 +157,49 @@ body {
   text-transform: uppercase;
 }
 
+.top-bar-spacer {
+  flex: 1;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn--danger {
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b44;
+}
+
+.btn--danger:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+
 /* ── Content Grid ─────────────────────────────────────────── */
 .content-grid {
   display: grid;
@@ -165,6 +208,36 @@ body {
   padding: 28px;
   max-width: 1200px;
   align-items: start;
+}
+
+/* Comparison mode: two form columns + results spanning both */
+.content-grid--compare {
+  grid-template-columns: 1fr 1fr;
+  max-width: 1400px;
+}
+
+/* ── Scenario Labels ──────────────────────────────────────── */
+.scenario-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-left: 3px solid;
+  padding-left: 8px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* ── Comparison Results ───────────────────────────────────── */
+.results-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.col-right--compare {
+  grid-column: 1 / -1;
 }
 
 /* ── Cards ────────────────────────────────────────────────── */
@@ -319,9 +392,18 @@ body {
     display: none;
   }
 
-  .content-grid {
+  .content-grid,
+  .content-grid--compare {
     grid-template-columns: 1fr;
     padding: 16px;
+  }
+
+  .col-right--compare {
+    grid-column: 1;
+  }
+
+  .results-comparison {
+    grid-template-columns: 1fr;
   }
 }
 

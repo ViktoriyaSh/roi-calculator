@@ -10,21 +10,57 @@ import {
   calcROI,
 } from './utils/calculations';
 
-const DEFAULTS = {
+const DEFAULTS_A = {
   initialInvestment: 100000,
   monthlyRevenue: 15000,
   monthlyCosts: 5000,
   period: 12,
 };
 
-function App() {
-  const [values, setValues] = useState(DEFAULTS);
+const DEFAULTS_B = {
+  initialInvestment: 150000,
+  monthlyRevenue: 20000,
+  monthlyCosts: 8000,
+  period: 12,
+};
 
+const SCENARIO_COLORS = {
+  A: '#3399ff',
+  B: '#ff8c00',
+};
+
+function calcScenario(values) {
   const monthlyNetProfit = calcMonthlyNetProfit(values.monthlyRevenue, values.monthlyCosts);
   const totalNetProfit = calcTotalNetProfit(monthlyNetProfit, values.period, values.initialInvestment);
-  const roi = calcROI(totalNetProfit, values.initialInvestment);
-  const payback = calcPaybackPeriod(values.initialInvestment, monthlyNetProfit);
-  const chartData = calcCumulativeCashFlow(monthlyNetProfit, values.initialInvestment, values.period);
+  return {
+    monthlyNetProfit,
+    totalNetProfit,
+    roi: calcROI(totalNetProfit, values.initialInvestment),
+    payback: calcPaybackPeriod(values.initialInvestment, monthlyNetProfit),
+    chartData: calcCumulativeCashFlow(monthlyNetProfit, values.initialInvestment, values.period),
+  };
+}
+
+function App() {
+  const [valuesA, setValuesA] = useState(DEFAULTS_A);
+  const [valuesB, setValuesB] = useState(DEFAULTS_B);
+  const [comparing, setComparing] = useState(false);
+
+  const scenarioA = calcScenario(valuesA);
+  const scenarioB = calcScenario(valuesB);
+
+  // Merge chart data for comparison: each point has valueA and valueB keyed by month
+  const maxPeriod = comparing ? Math.max(valuesA.period, valuesB.period) : valuesA.period;
+  const mergedChartData = Array.from({ length: maxPeriod }, (_, i) => {
+    const month = i + 1;
+    const pointA = scenarioA.chartData.find(d => d.month === month);
+    const pointB = scenarioB.chartData.find(d => d.month === month);
+    return {
+      month,
+      valueA: pointA ? pointA.value : undefined,
+      valueB: pointB ? pointB.value : undefined,
+    };
+  });
 
   return (
     <div className="app-shell">
@@ -53,21 +89,67 @@ function App() {
         <header className="top-bar">
           <h1 className="top-bar-title">Business ROI Calculator</h1>
           <span className="top-bar-badge">Live</span>
+          <div className="top-bar-spacer" />
+          {comparing ? (
+            <button className="btn btn--danger" onClick={() => setComparing(false)}>
+              ✕ Remove Scenario
+            </button>
+          ) : (
+            <button className="btn btn--primary" onClick={() => setComparing(true)}>
+              + Add Scenario
+            </button>
+          )}
         </header>
 
-        <div className="content-grid">
+        <div className={`content-grid${comparing ? ' content-grid--compare' : ''}`}>
+          {/* Scenario A form */}
           <section className="col-left">
-            <InputForm values={values} onChange={setValues} />
+            <InputForm
+              values={valuesA}
+              onChange={setValuesA}
+              label="Scenario A"
+              color={SCENARIO_COLORS.A}
+              showLabel={comparing}
+            />
           </section>
 
-          <section className="col-right">
-            <Results
-              roi={roi}
-              payback={payback}
-              totalNetProfit={totalNetProfit}
-              monthlyNetProfit={monthlyNetProfit}
+          {/* Scenario B form — only in comparison mode */}
+          {comparing && (
+            <section className="col-left">
+              <InputForm
+                values={valuesB}
+                onChange={setValuesB}
+                label="Scenario B"
+                color={SCENARIO_COLORS.B}
+                showLabel={true}
+              />
+            </section>
+          )}
+
+          {/* Results + Chart span full remaining width */}
+          <section className={`col-right${comparing ? ' col-right--compare' : ''}`}>
+            {comparing ? (
+              <div className="results-comparison">
+                <Results
+                  {...scenarioA}
+                  label="Scenario A"
+                  color={SCENARIO_COLORS.A}
+                />
+                <Results
+                  {...scenarioB}
+                  label="Scenario B"
+                  color={SCENARIO_COLORS.B}
+                />
+              </div>
+            ) : (
+              <Results {...scenarioA} />
+            )}
+            <CashFlowChart
+              data={comparing ? mergedChartData : scenarioA.chartData}
+              comparing={comparing}
+              colorA={SCENARIO_COLORS.A}
+              colorB={SCENARIO_COLORS.B}
             />
-            <CashFlowChart data={chartData} />
           </section>
         </div>
       </main>

@@ -1,23 +1,36 @@
 import { formatCurrency, formatPercent } from '../utils/calculations';
 
-function MetricCard({ label, value, highlight }) {
+function MetricCard({ label, value, color }) {
+  const isHighlight = !!color;
   return (
-    <div className={`metric-card${highlight ? ' metric-card--highlight' : ''}`}>
+    <div
+      className={`metric-card${isHighlight ? ' metric-card--highlight' : ''}`}
+      style={isHighlight ? { borderColor: color, background: `${color}18` } : {}}
+    >
       <span className="metric-label">{label}</span>
-      <span className="metric-value">{value}</span>
+      <span className="metric-value" style={isHighlight ? { color } : {}}>
+        {value}
+      </span>
     </div>
   );
 }
 
-function Results({ roi, payback, totalNetProfit, monthlyNetProfit }) {
+function Results({ roi, payback, totalNetProfit, monthlyNetProfit, label, color }) {
   return (
     <div className="card results">
-      <h2 className="section-title">Results</h2>
+      <h2 className="section-title">
+        {label && color ? (
+          <span className="scenario-label" style={{ borderLeftColor: color, color }}>
+            {label}
+          </span>
+        ) : null}
+        Results
+      </h2>
       <div className="metrics-grid">
         <MetricCard
           label="ROI"
           value={formatPercent(roi)}
-          highlight
+          color={color}
         />
         <MetricCard
           label="Payback Period"

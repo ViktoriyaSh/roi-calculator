@@ -6,6 +6,7 @@ import {
   CartesianGrid,
   Tooltip,
   ReferenceLine,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import { formatCurrency } from '../utils/calculations';
@@ -17,19 +18,27 @@ function formatYAxis(value) {
   return '$' + value;
 }
 
-function CustomTooltip({ active, payload, label }) {
+function CustomTooltip({ active, payload, label, comparing }) {
   if (active && payload && payload.length) {
     return (
       <div className="chart-tooltip">
         <p className="chart-tooltip-month">Month {label}</p>
-        <p className="chart-tooltip-value">{formatCurrency(payload[0].value)}</p>
+        {payload.map((entry) => (
+          <p
+            key={entry.dataKey}
+            className="chart-tooltip-value"
+            style={{ color: entry.color }}
+          >
+            {comparing ? `${entry.name}: ` : ''}{formatCurrency(entry.value)}
+          </p>
+        ))}
       </div>
     );
   }
   return null;
 }
 
-function CashFlowChart({ data }) {
+function CashFlowChart({ data, comparing, colorA, colorB }) {
   return (
     <div className="card chart-card">
       <h2 className="section-title">Cumulative Cash Flow</h2>
@@ -42,16 +51,54 @@ function CashFlowChart({ data }) {
             tick={{ fill: '#8888aa', fontSize: 12 }}
           />
           <YAxis tickFormatter={formatYAxis} tick={{ fill: '#8888aa', fontSize: 12 }} />
-          <Tooltip content={<CustomTooltip />} />
-          <ReferenceLine y={0} stroke="#555577" strokeDasharray="6 3" label={{ value: 'Break-even', fill: '#8888aa', fontSize: 11 }} />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke="#3399ff"
-            strokeWidth={2.5}
-            dot={false}
-            activeDot={{ r: 5, fill: '#3399ff' }}
+          <Tooltip content={<CustomTooltip comparing={comparing} />} />
+          {comparing && (
+            <Legend
+              wrapperStyle={{ paddingTop: 12, fontSize: 13 }}
+              formatter={(value) => (
+                <span style={{ color: value === 'Scenario A' ? colorA : colorB }}>{value}</span>
+              )}
+            />
+          )}
+          <ReferenceLine
+            y={0}
+            stroke="#555577"
+            strokeDasharray="6 3"
+            label={{ value: 'Break-even', fill: '#8888aa', fontSize: 11 }}
           />
+          {comparing ? (
+            <>
+              <Line
+                type="monotone"
+                dataKey="valueA"
+                name="Scenario A"
+                stroke={colorA}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5, fill: colorA }}
+                connectNulls
+              />
+              <Line
+                type="monotone"
+                dataKey="valueB"
+                name="Scenario B"
+                stroke={colorB}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5, fill: colorB }}
+                connectNulls
+              />
+            </>
+          ) : (
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke={colorA || '#3399ff'}
+              strokeWidth={2.5}
+              dot={false}
+              activeDot={{ r: 5, fill: colorA || '#3399ff' }}
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>
