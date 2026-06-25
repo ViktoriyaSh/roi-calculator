@@ -5,6 +5,7 @@ import CashFlowChart from './components/CashFlowChart';
 import BreakdownTable from './components/BreakdownTable';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import EmbedModal from './components/EmbedModal';
+import useLocalStorage from './utils/useLocalStorage';
 import {
   calcMonthlyNetProfit,
   calcCumulativeCashFlow,
@@ -48,25 +49,29 @@ function calcScenario(values) {
 }
 
 function App() {
-  const [valuesA, setValuesA] = useState(DEFAULTS_A);
-  const [valuesB, setValuesB] = useState(DEFAULTS_B);
-  const [comparing, setComparing] = useState(false);
+  const [valuesA, setValuesA] = useLocalStorage('roi-scenario-a', DEFAULTS_A);
+  const [valuesB, setValuesB] = useLocalStorage('roi-scenario-b', DEFAULTS_B);
+  const [comparing, setComparing] = useLocalStorage('roi-comparing', false);
   const [validA, setValidA] = useState(true);
   const [validB, setValidB] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem('roi-theme') || 'epam'
-  );
+  const [calcMenuOpen, setCalcMenuOpen] = useState(false);
+  const [theme, setTheme] = useLocalStorage('roi-theme', 'epam');
 
-  // Detect ?embed=true in URL — hides sidebar and top bar
   const embedMode = new URLSearchParams(window.location.search).get('embed') === 'true';
 
-  // Apply theme to <html> and persist to localStorage
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('roi-theme', theme);
   }, [theme]);
+
+  // Close the Calculator dropdown when clicking anywhere outside it
+  useEffect(() => {
+    if (!calcMenuOpen) return;
+    function handleClick() { setCalcMenuOpen(false); }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [calcMenuOpen]);
 
   const scenarioA = calcScenario(valuesA);
   const scenarioB = calcScenario(valuesB);
@@ -101,9 +106,41 @@ function App() {
             <span className="sidebar-logo-sub">ROI Calculator</span>
           </div>
           <nav className="sidebar-nav">
-            <a className="sidebar-nav-item sidebar-nav-item--active" href="#">
-              <span className="nav-icon">&#9698;</span> Calculator
-            </a>
+            {/* Calculator — dropdown menu */}
+            <div
+              className="sidebar-nav-item sidebar-nav-item--active nav-dropdown"
+              onMouseDown={e => { e.stopPropagation(); setCalcMenuOpen(o => !o); }}
+            >
+              <span className="nav-icon">&#9698;</span>
+              Calculator
+              <span className="nav-dropdown-arrow">{calcMenuOpen ? '▴' : '▾'}</span>
+            </div>
+            {calcMenuOpen && (
+              <div className="nav-dropdown-menu" onMouseDown={e => e.stopPropagation()}>
+                <button
+                  className="nav-dropdown-item"
+                  onClick={() => { setValuesA(DEFAULTS_A); if (comparing) setValuesB(DEFAULTS_B); setCalcMenuOpen(false); }}
+                >
+                  ↺ Reset {comparing ? 'All Scenarios' : 'to Defaults'}
+                </button>
+                {comparing && (
+                  <>
+                    <button
+                      className="nav-dropdown-item"
+                      onClick={() => { setValuesA(DEFAULTS_A); setCalcMenuOpen(false); }}
+                    >
+                      ↺ Reset Scenario A
+                    </button>
+                    <button
+                      className="nav-dropdown-item"
+                      onClick={() => { setValuesB(DEFAULTS_B); setCalcMenuOpen(false); }}
+                    >
+                      ↺ Reset Scenario B
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
             <a className="sidebar-nav-item" href="#">
               <span className="nav-icon">&#9776;</span> Reports
             </a>
